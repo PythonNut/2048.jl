@@ -23,45 +23,134 @@ end
 @everywhere function shift_row{X,Y}(row::SubArray{Int8, 1, Board, X, Y})
     a, b, c, d = row
 
-    if c == 0
-        c = d
-        d = 0
-    end
+    # This may appear naive. However, it's the simplest possible implementation
+    # that executes with the minimal number of operations per shift.
 
-    if b == 0
-        b = c
-        c = d
-        d = 0
-    end
-
-    if a == 0
-        a = b
-        b = c
-        c = d
-        d = 0
-    end
-
-    if a == b != 0
-        if c == d != 0
-            a, b, c, d = a+1, c+1, 0, 0
-        else
-            a, b, c, d = a+1, c, d, 0
+    if a == 0 # 0 ? ? ?
+        if b == 0 # 0 0 ? ?
+            if c == 0 # 0 0 0 ?
+                if d == 0 # 0 0 0 0
+                    return false
+                else
+                    a = d
+                    d = 0
+                end
+            else # 0 0 c ?
+                if c == d # 0 0 c c
+                    a = c + 1
+                    c = 0
+                    d = 0
+                else # 0 0 c d
+                    a = c
+                    b = d
+                    c = 0
+                    d = 0
+                end
+            end
+        else # 0 b ? ?
+            if c == 0 # 0 b 0 ?
+                if b == d # 0 b 0 b
+                    a = b + 1
+                    b = 0
+                    d = 0
+                else # 0 b 0 d
+                    a = b
+                    b = d
+                    d = 0
+                end
+            elseif b == c  # 0 b b ?
+                a = b + 1
+                b = d
+                c = 0
+                d = 0
+            else # 0 b c ?
+                if c == d # 0 b c c
+                    a = b
+                    b = c + 1
+                    c = 0
+                    d = 0
+                else # 0 b c d
+                    a = b
+                    b = c
+                    c = d
+                    d = 0
+                end
+            end
         end
-    else
-        if b == c != 0
-            a, b, c, d = a, b+1, d, 0
-        else
-            if c == d != 0
-                a, b, c, d = a, b, c+1, 0
+    else # a ? ? ?
+        if b == 0 # a 0 ? ?
+            if c == 0 # a 0 0 ?
+                if d == 0 # a 0 0 0
+                    return false
+                elseif d == a # a 0 0 a
+                    a += 1
+                    d = 0
+                else  # a 0 0 d
+                    b = d
+                    d = 0
+                end
+            elseif c == a # a 0 a ?
+                a += 1
+                b = d
+                c = 0
+                d = 0
+            else # a 0 c ?
+                if c == d # a 0 c c
+                    b = c + 1
+                    c = 0
+                    d = 0
+                else # a 0 c d
+                    b = c
+                    c = d
+                    d = 0
+                end
+            end
+        elseif a == b # a a ? ?
+            if c == 0 # a a 0 ?
+                a += 1
+                b = d
+                d = 0
+            else # a a b ?
+                if c == d # a a c c
+                    a += 1
+                    b = c + 1
+                    c = 0
+                    d = 0
+                else # a a c d
+                    a += 1
+                    b = c
+                    c = d
+                    d = 0
+                end
+            end
+        else # a b ? ?
+            if c == 0 # a b 0 ?
+                if d == 0 # a b 0 0
+                    return false
+                elseif d == b # a b 0 b
+                    b += 1
+                    d = 0
+                else # a b 0 d
+                    c = d
+                    d = 0
+                end
+            elseif c == b # a b b ?
+                b += 1
+                c = d
+                d = 0
+            else # a b c ?
+                if d == c # a b c c
+                    c += 1
+                    d = 0
+                else # a b c d
+                    return false
+                end
             end
         end
     end
 
-    if row[1] != a || row[2] != b || row[3] != c || row[4] != d
-        row[1], row[2], row[3], row[4] = a, b, c, d
-        return true
-    end
-    return false
+    row[1], row[2], row[3], row[4] = a, b, c, d
+    return true
 end
 
 @everywhere function shift_board_up(board::Board)
