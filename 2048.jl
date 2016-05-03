@@ -57,23 +57,10 @@ end
         end
     end
 
-    if row[1] != a
+    if row[1] != a || row[2] != b || row[3] != c || row[4] != d
         row[1], row[2], row[3], row[4] = a, b, c, d
         return true
-
-    elseif row[2] != b
-        row[2], row[3], row[4] = b, c, d
-        return true
-
-    elseif row[3] != c
-        row[3], row[4] = c, d
-        return true
-
-    elseif row[4] != d
-        row[4] == d
-        return true
     end
-
     return false
 end
 
