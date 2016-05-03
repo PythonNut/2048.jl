@@ -52,7 +52,7 @@ end
             a, b, c, d = a, b+1, d, 0
         else
             if c == d != 0
-                a, b, c, d = a, b, c+1, d
+                a, b, c, d = a, b, c+1, 0
             end
         end
     end
