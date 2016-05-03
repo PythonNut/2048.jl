@@ -276,4 +276,41 @@ function main()
     end
 end
 
+function main_interactive()
+    board = create_board()
+    changed = true
+    n = 1
+    while true
+        if changed
+            if !insert_board_rand(board)
+                println("Game end!")
+                break
+            end
+            n += 1
+        end
+
+        changed = false
+        display_board(board)
+        write(STDIN, "> ")
+        ipt = strip(readline(STDIN))
+        if ipt == "d"
+            changed = shift_board_down(board)
+        elseif ipt == "u"
+            changed = shift_board_up(board)
+        elseif ipt == "l"
+            changed = shift_board_left(board)
+        elseif ipt == "r"
+            changed = shift_board_right(board)
+            # elseif ipt == "p\n"
+            #     println(appraise_move(board, identity))
+        else
+            println("invalid move!")
+        end
+
+        if !changed
+            println("NOP!")
+        end
+    end
+end
+
 main()
