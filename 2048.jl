@@ -144,19 +144,20 @@ function main()
     board = create_board()
     changed = true
     n = 1
+    total_time = 0
     while true
         if changed
             if !insert_board_rand(board)
                 println("Game end!")
                 break
             end
-            n += 1
         end
         tic()
         u = appraise_move(board, shift_board_up)
         d = appraise_move(board, shift_board_down)
         l = appraise_move(board, shift_board_left)
         r = appraise_move(board, shift_board_right)
+        n += 1
 
         display_board(board)
         @printf("u:%f ", u)
@@ -164,10 +165,12 @@ function main()
         @printf("l:%f ", l)
         @printf("r:%f\n", r)
         @printf("n:%d ", n)
-        @printf("t:%f\n", toq())
+        time = toq()
+        total_time += time
+        @printf("Δt:%f ", time)
+        @printf("μₜ:%f\n", total_time/n)
 
         changed = false
-        # ipt = readline(STDIN)
         if d == max(u, d, l, r)
             changed = shift_board_down(board)
         elseif u == max(u, d, l, r)
