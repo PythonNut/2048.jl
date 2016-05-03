@@ -232,7 +232,7 @@ end
 function main()
     board = create_board()
     changed = true
-    n = 1
+    n = 0
     total_time = 0
     while true
         if changed
