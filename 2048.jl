@@ -252,11 +252,8 @@ function main()
         n += 1
 
         display_board(board)
-        @printf("u:%f ", u)
-        @printf("d:%f ", d)
-        @printf("l:%f ", l)
-        @printf("r:%f\n", r)
         @printf("n:%d ", n)
+        @printf("s:%f ", max(u, d, l, r))
         time = toq()
         total_time += time
         @printf("Δt:%f ", time)
