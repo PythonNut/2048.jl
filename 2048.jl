@@ -154,35 +154,31 @@ end
 end
 
 @everywhere function shift_board_up(board::Board)
-    changed = false
-    for col in 1:4
-        changed |= shift_row(slice(board, :, col))
-    end
-    return changed
+    return (shift_row(slice(board, :, 1)) |
+            shift_row(slice(board, :, 2)) |
+            shift_row(slice(board, :, 3)) |
+            shift_row(slice(board, :, 4)))
 end
 
 @everywhere function shift_board_down(board::Board)
-    changed = false
-    for col in 1:4
-        changed |= shift_row(slice(board, 4:-1:1, col))
-    end
-    return changed
+    return (shift_row(slice(board, 4:-1:1, 1)) |
+            shift_row(slice(board, 4:-1:1, 2)) |
+            shift_row(slice(board, 4:-1:1, 3)) |
+            shift_row(slice(board, 4:-1:1, 4)))
 end
 
 @everywhere function shift_board_left(board::Board)
-    changed = false
-    for row in 1:4
-        changed |= shift_row(slice(board, row, :))
-    end
-    return changed
+    return (shift_row(slice(board, 1, :)) |
+            shift_row(slice(board, 2, :)) |
+            shift_row(slice(board, 3, :)) |
+            shift_row(slice(board, 4, :)))
 end
 
 @everywhere function shift_board_right(board::Board)
-    changed = false
-    for row in 1:4
-        changed |= shift_row(slice(board, row, 4:-1:1))
-    end
-    return changed
+    return (shift_row(slice(board, 1, 4:-1:1)) |
+            shift_row(slice(board, 2, 4:-1:1)) |
+            shift_row(slice(board, 3, 4:-1:1)) |
+            shift_row(slice(board, 4, 4:-1:1)))
 end
 
 @everywhere function display_board(board::Board)
@@ -195,8 +191,7 @@ end
     for _ in 1:n
         if changed
             if !insert_board_rand(board, rng)
-                return score_board(board)
-                break
+                return 0
             end
         end
         changed = false
