@@ -182,7 +182,15 @@ end
 end
 
 @everywhere function display_board(board::Board)
-    println(board)
+    print("\n")
+    for j = 1:size(board,2)
+        print("  ")
+        for i = 1:size(board,1)
+            print(rpad(string(board[i,j]),3," "))
+        end
+        print("\n")
+    end
+    print("\n")
 end
 
 @everywhere function play_rand(board_copy, n, rng)
