@@ -251,6 +251,8 @@ function main()
         r = appraise_move(board, shift_board_right, rng)
         n += 1
 
+        run(@unix ? `clear` : `cmd /c cls`)
+
         display_board(board)
         @printf("n:%d ", n)
         @printf("s:%f ", max(u, d, l, r))
