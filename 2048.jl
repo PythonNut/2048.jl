@@ -149,7 +149,7 @@ end
         end
     end
 
-    row[1], row[2], row[3], row[4] = a, b, c, d
+    @inbounds row[1], row[2], row[3], row[4] = a, b, c, d
     return true
 end
 
