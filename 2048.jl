@@ -4,12 +4,12 @@ function create_board()
     return zeros(Int8, 4, 4)
 end
 
-@everywhere function insert_board_rand(board::Board)
+@everywhere function insert_board_rand(board::Board, rng)
     idxs = findin(board, 0)
     if length(idxs) == 0
         return false
     end
-    idx = rand(idxs)
+    idx = rand(rng, idxs)
 
     # I read this off a spec for the game, I haven't checked if it's correct
     board[idx] = rand() < 0.9 ? 1 : 2
@@ -189,19 +189,18 @@ end
     println(board)
 end
 
-@everywhere function play_rand(board_copy, n)
+@everywhere function play_rand(board_copy, n, rng)
     board = deepcopy(board_copy)
-    insert_board_randboard
     changed = true
     for _ in 1:n
         if changed
-            if !insert_board_rand(board)
+            if !insert_board_rand(board, rng)
                 return score_board(board)
                 break
             end
         end
         changed = false
-        ipt = rand(1:4)
+        ipt = rand(rng, 1:4)
 
         if ipt == 1
             changed = shift_board_down(board)
@@ -216,7 +215,7 @@ end
     return score_board(board)
 end
 
-@everywhere function appraise_move(board_copy, move)
+@everywhere function appraise_move(board_copy, move, rng)
     board = deepcopy(board_copy)
     legal = move(board)
     if !legal
@@ -224,7 +223,7 @@ end
     end
     n_iters = 100000
     total_score = @parallel (+) for _ in 1:n_iters
-        play_rand(board, 50)
+        play_rand(board, 50, rng)
     end
     return total_score/n_iters
 end
@@ -234,18 +233,19 @@ function main()
     changed = true
     n = 0
     total_time = 0
+    rng = MersenneTwister()
     while true
         if changed
-            if !insert_board_rand(board)
+            if !insert_board_rand(board, rng)
                 println("Game end!")
                 break
             end
         end
         tic()
-        u = appraise_move(board, shift_board_up)
-        d = appraise_move(board, shift_board_down)
-        l = appraise_move(board, shift_board_left)
-        r = appraise_move(board, shift_board_right)
+        u = appraise_move(board, shift_board_up, rng)
+        d = appraise_move(board, shift_board_down, rng)
+        l = appraise_move(board, shift_board_left, rng)
+        r = appraise_move(board, shift_board_right, rng)
         n += 1
 
         display_board(board)
@@ -285,9 +285,10 @@ function main_interactive()
     board = create_board()
     changed = true
     n = 1
+    rng = MersenneTwister()
     while true
         if changed
-            if !insert_board_rand(board)
+            if !insert_board_rand(board, rng)
                 println("Game end!")
                 break
             end
