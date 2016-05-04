@@ -260,6 +260,11 @@ function main()
         @printf("μₜ:%f\n", total_time/n)
 
         changed = false
+        if max(u, d, l, r) == 0
+            println("Game over!")
+            return
+        end
+
         if d == max(u, d, l, r)
             changed = shift_board_down(board)
         elseif u == max(u, d, l, r)
