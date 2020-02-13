@@ -1,11 +1,14 @@
-@everywhere typealias Board Array{Int8, 2}
+using Printf
+using Random
+
+const Board = Array{Int8, 2}
 
 function create_board()
     return zeros(Int8, 4, 4)
 end
 
-@everywhere function insert_board_rand(board::Board, rng)
-    idxs = findin(board, 0)
+function insert_board_rand(board::Board, rng)
+    idxs = findall(board .== 0)
     if length(idxs) == 0
         return false
     end
@@ -16,11 +19,11 @@ end
     return true
 end
 
-@everywhere function score_board(board::Board)
-    return length(findin(board, 0))
+function score_board(board::Board)
+    return length(findall(board .== 0))
 end
 
-@everywhere function shift_row{X,Y}(row::SubArray{Int8, 1, Board, X, Y})
+function shift_row(row)
     a, b, c, d = row
 
     # This may appear naive. However, it's the simplest possible implementation
@@ -153,35 +156,35 @@ end
     return true
 end
 
-@everywhere function shift_board_up(board::Board)
-    return (shift_row(slice(board, :, 1)) |
-            shift_row(slice(board, :, 2)) |
-            shift_row(slice(board, :, 3)) |
-            shift_row(slice(board, :, 4)))
+function shift_board_up(board::Board)
+    return (shift_row(@view board[:, 1]) |
+            shift_row(@view board[:, 2]) |
+            shift_row(@view board[:, 3]) |
+            shift_row(@view board[:, 4]))
 end
 
-@everywhere function shift_board_down(board::Board)
-    return (shift_row(slice(board, 4:-1:1, 1)) |
-            shift_row(slice(board, 4:-1:1, 2)) |
-            shift_row(slice(board, 4:-1:1, 3)) |
-            shift_row(slice(board, 4:-1:1, 4)))
+function shift_board_down(board::Board)
+    return (shift_row(@view board[4:-1:1, 1]) |
+            shift_row(@view board[4:-1:1, 2]) |
+            shift_row(@view board[4:-1:1, 3]) |
+            shift_row(@view board[4:-1:1, 4]))
 end
 
-@everywhere function shift_board_left(board::Board)
-    return (shift_row(slice(board, 1, :)) |
-            shift_row(slice(board, 2, :)) |
-            shift_row(slice(board, 3, :)) |
-            shift_row(slice(board, 4, :)))
+function shift_board_left(board::Board)
+    return (shift_row(@view board[1, :]) |
+            shift_row(@view board[2, :]) |
+            shift_row(@view board[3, :]) |
+            shift_row(@view board[4, :]))
 end
 
-@everywhere function shift_board_right(board::Board)
-    return (shift_row(slice(board, 1, 4:-1:1)) |
-            shift_row(slice(board, 2, 4:-1:1)) |
-            shift_row(slice(board, 3, 4:-1:1)) |
-            shift_row(slice(board, 4, 4:-1:1)))
+function shift_board_right(board::Board)
+    return (shift_row(@view board[1, 4:-1:1]) |
+            shift_row(@view board[2, 4:-1:1]) |
+            shift_row(@view board[3, 4:-1:1]) |
+            shift_row(@view board[4, 4:-1:1]))
 end
 
-@everywhere function display_board(board::Board)
+function display_board(board::Board)
     print("\n")
     for j = 1:size(board,2)
         print("  ")
@@ -193,7 +196,7 @@ end
     print("\n")
 end
 
-@everywhere function play_rand(board_copy, n, rng)
+function play_rand(board_copy, n, rng)
     board = deepcopy(board_copy)
     changed = true
     for _ in 1:n
@@ -218,15 +221,16 @@ end
     return score_board(board)
 end
 
-@everywhere function appraise_move(board_copy, move, rng)
+function appraise_move(board_copy, move, rng)
     board = deepcopy(board_copy)
     legal = move(board)
     if !legal
         return 0
     end
     n_iters = 100000
-    total_score = @parallel (+) for _ in 1:n_iters
-        play_rand(board, 50, rng)
+    total_score = 0
+    for _ in 1:n_iters
+        total_score += play_rand(board, 50, rng)
     end
     return total_score/n_iters
 end
@@ -244,19 +248,19 @@ function main()
                 break
             end
         end
-        tic()
-        u = appraise_move(board, shift_board_up, rng)
-        d = appraise_move(board, shift_board_down, rng)
-        l = appraise_move(board, shift_board_left, rng)
-        r = appraise_move(board, shift_board_right, rng)
-        n += 1
+        time = @elapsed begin
+            u = appraise_move(board, shift_board_up, rng)
+            d = appraise_move(board, shift_board_down, rng)
+            l = appraise_move(board, shift_board_left, rng)
+            r = appraise_move(board, shift_board_right, rng)
+            n += 1
 
-        run(@unix ? `clear` : `cmd /c cls`)
+            run(`clear`)
 
-        display_board(board)
-        @printf("n:%d ", n)
-        @printf("s:%f ", max(u, d, l, r))
-        time = toq()
+            display_board(board)
+            @printf("n:%d ", n)
+            @printf("s:%f ", max(u, d, l, r))
+        end
         total_time += time
         @printf("Δt:%f ", time)
         @printf("μₜ:%f\n", total_time/n)
